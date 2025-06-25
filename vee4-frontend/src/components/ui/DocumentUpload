@@ -1,0 +1,172 @@
+import React, { useState } from 'react';
+import { adminService } from '../../services/api';
+import Button from '../ui/Button';
+
+// Fixed DocumentUpload component to handle null ref issue
+const DocumentUpload = ({ orderId, documentType, title, description, onUploadSuccess }) => {
+    const [file, setFile] = useState(null);
+    const [uploading, setUploading] = useState(false);
+    const [error, setError] = useState(null);
+    const [progress, setProgress] = useState(0);
+    
+    // Create a more stable ref that won't be null
+    const fileInputRef = useRef(null);
+    
+    // Handle file selection
+    const handleFileChange = (e) => {
+      if (e.target.files && e.target.files.length > 0) {
+        const selectedFile = e.target.files[0];
+        
+        // Validate file type
+        if (selectedFile.type !== 'application/pdf') {
+          setError('Only PDF files are allowed');
+          return;
+        }
+        
+        // Validate file size (10MB max)
+        if (selectedFile.size > 10 * 1024 * 1024) {
+          setError('File size exceeds the 10MB limit');
+          return;
+        }
+        
+        setFile(selectedFile);
+        setError(null);
+      }
+    };
+    
+    // Handle file upload
+    const handleUpload = async () => {
+      if (!file) {
+        setError('Please select a file first');
+        return;
+      }
+      
+      setUploading(true);
+      setProgress(0);
+      
+      try {
+        // Create a FormData object
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('notifyCustomer', true);
+        
+        // Create a custom config for axios to track upload progress
+        const config = {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+          onUploadProgress: (progressEvent) => {
+            const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+            setProgress(percentCompleted);
+          },
+        };
+        
+        // Make the API call
+        const response = await adminService.uploadOrderDocument(orderId, documentType, formData, config);
+        
+        // Handle success
+        if (onUploadSuccess) {
+          onUploadSuccess(response.data.document);
+        }
+        
+        // Reset the form - safely check if ref is available
+        setFile(null);
+        if (fileInputRef.current) {
+          fileInputRef.current.value = '';
+        }
+        
+      } catch (err) {
+        console.error('Upload error:', err);
+        setError(err.response?.data?.message || 'Failed to upload document. Please try again.');
+      } finally {
+        setUploading(false);
+      }
+    };
+    
+    // Handle click on the upload button
+    const handleUploadClick = () => {
+      if (fileInputRef.current) {
+        fileInputRef.current.click();
+      }
+    };
+    
+    return (
+      <div className="document-upload">
+        <h4 className="document-title">{title}</h4>
+        <p className="document-desc">{description}</p>
+        
+        {error && (
+          <div className="upload-error" style={{ color: 'red', marginBottom: '0.5rem' }}>
+            {error}
+          </div>
+        )}
+        
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem' }}>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".pdf"
+            style={{ display: 'none' }}
+            onChange={handleFileChange}
+          />
+          
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={handleUploadClick}
+            disabled={uploading}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="17 8 12 3 7 8"></polyline>
+              <line x1="12" y1="3" x2="12" y2="15"></line>
+            </svg>
+            <span style={{ marginLeft: '0.5rem' }}>Select PDF</span>
+          </Button>
+          
+          {file && (
+            <Button 
+              variant="primary" 
+              size="sm" 
+              onClick={handleUpload}
+              disabled={uploading}
+            >
+              {uploading ? `Uploading... ${progress}%` : 'Upload Document'}
+            </Button>
+          )}
+        </div>
+        
+        {file && !uploading && (
+          <div className="selected-file" style={{ 
+            backgroundColor: '#f1f5f9', 
+            padding: '0.5rem', 
+            borderRadius: '0.375rem',
+            fontSize: '0.875rem'
+          }}>
+            <strong>Selected file:</strong> {file.name} ({(file.size / 1024).toFixed(2)} KB)
+          </div>
+        )}
+        
+        {uploading && (
+          <div className="upload-progress">
+            <div className="progress-bar" style={{ 
+              height: '6px',
+              backgroundColor: '#e2e8f0',
+              borderRadius: '3px',
+              overflow: 'hidden'
+            }}>
+              <div style={{ 
+                width: `${progress}%`,
+                height: '100%',
+                backgroundColor: '#3b82f6',
+                transition: 'width 0.3s ease'
+              }}></div>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  };
+
+
+export default DocumentUpload;
