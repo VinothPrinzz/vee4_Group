@@ -87,7 +87,7 @@ const app = express();
 // Middleware
 app.use(cors({
   origin: [
-    'https://vee4group-frontend.onrender.com', 
+    'https://vee4-group-frontend.onrender.com', 
     'http://localhost:3000'
   ],
   credentials: true
