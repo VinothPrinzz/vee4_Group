@@ -4,7 +4,7 @@ import axios from 'axios';
 
 // Create axios instance with base URL
 const api = axios.create({
-  baseURL: process.env.REACT_APP_API_URL || 'https://vee4group-backend.onrender.com/api/v1',
+  baseURL: process.env.REACT_APP_API_URL || 'https://vee4-group.onrender.com/api/v1',
   headers: {
     'Content-Type': 'application/json'
   }
