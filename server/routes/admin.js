@@ -658,6 +658,7 @@ router.get('/orders/:id', protect, isAdmin, async (req, res) => {
       },
       content: message.content,
       createdAt: message.createdAt,
+      isSystemMessage: message.isSystemMessage || false, // ADD THIS LINE
     }));
     
     res.status(200).json({
@@ -705,24 +706,33 @@ router.put('/orders/:id/status', protect, isAdmin, async (req, res) => {
     
     console.log('Status update request:', { status, notifyCustomer, message, expectedDeliveryDate }); // Debug log
     
-    // Check if status is valid
+    // Check if status is valid - UPDATED to match Order model enum
     const validStatuses = [
       'pending',
       'approved',
       'rejected',
+      'cancelled',
+      'designing',           
+      'laser_cutting',         
+      'metal_bending',       
+      'fabrication_welding', 
+      'finishing',           
+      'powder_coating',
+      'assembling',          
+      'quality_check',
+      'dispatch',            
+      'completed',
       'material_prep',
       'fabrication',
-      'powder_coating',
-      'quality_check',
       'packaging',
-      'delivered',
-      'completed',
+      'delivered'
     ];
     
     if (!validStatuses.includes(status)) {
+      console.log('Invalid status attempted:', status); // Debug log
       return res.status(400).json({
         success: false,
-        message: 'Invalid status',
+        message: `Invalid status: ${status}. Valid statuses are: ${validStatuses.join(', ')}`,
       });
     }
     

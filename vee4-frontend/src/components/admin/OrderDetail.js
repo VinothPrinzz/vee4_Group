@@ -787,6 +787,7 @@ startxref
           <MessageBox
             messages={order.messages || []}
             onSendMessage={handleSendMessage}
+            currentUserRole="admin"
           />
         </div>
       </Card>

@@ -371,6 +371,7 @@ const OrderDetail = () => {
           <MessageBox
             messages={order.messages || []}
             onSendMessage={handleSendMessage}
+            currentUserRole="customer"
           />
         </div>
       </Card>

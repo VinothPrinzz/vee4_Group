@@ -72,6 +72,7 @@ router.get('/:id', protect, async (req, res) => {
       },
       content: message.content,
       createdAt: message.createdAt,
+      isSystemMessage: message.isSystemMessage || false, // ADD THIS LINE
     }));
     
     // Prepare progress steps based on status
@@ -219,11 +220,29 @@ router.post('/', protect, upload.single('designFile'), async (req, res) => {
     });
     
     // Create a welcome message from system
-    await Message.create({
-      orderId: order._id,
-      senderId: req.user._id, 
-      content: 'Thank you for your order. We are currently reviewing your specifications and will update you soon.',
-    });
+    try {
+      // Find an admin user to use as sender
+      const adminUser = await User.findOne({ role: 'admin' });
+      
+      if (adminUser) {
+        await Message.create({
+          orderId: order._id,
+          senderId: adminUser._id, // Use admin ID instead of customer ID
+          content: 'Thank you for your order. We are currently reviewing your specifications and will update you soon.',
+        });
+      } else {
+        // Fallback: create message with system flag
+        await Message.create({
+          orderId: order._id,
+          senderId: req.user._id,
+          content: 'Thank you for your order. We are currently reviewing your specifications and will update you soon.',
+          isSystemMessage: true, // Add system flag
+        });
+      }
+    } catch (messageError) {
+      console.error('Error creating welcome message:', messageError);
+      // Don't fail order creation if message creation fails
+    }
     
     // Create notifications for all admin users
     try {
