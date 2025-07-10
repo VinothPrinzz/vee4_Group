@@ -136,8 +136,6 @@ router.get('/orders/:id', protect, isAdmin, async (req, res) => {
         productType: order.productType,
         metalType: order.metalType,
         thickness: order.thickness,
-        width: order.width,
-        height: order.height,
         quantity: order.quantity,
         color: order.color,
         additionalRequirements: order.additionalRequirements,

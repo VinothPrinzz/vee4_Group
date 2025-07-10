@@ -5,7 +5,6 @@ const OrderSchema = new mongoose.Schema({
   orderNumber: {
     type: String,
     unique: true,
-    // Remove required: true here since we'll generate it in the pre-save hook
   },
   customerId: {
     type: mongoose.Schema.Types.ObjectId,
@@ -50,14 +49,6 @@ const OrderSchema = new mongoose.Schema({
     type: Number,
     required: true,
   },
-  width: {
-    type: Number,
-    required: true,
-  },
-  height: {
-    type: Number,
-    required: true,
-  },
   quantity: {
     type: Number,
     required: true,
@@ -67,21 +58,20 @@ const OrderSchema = new mongoose.Schema({
     required: true,
   },
   designFile: {
-    type: String, // URL to stored PDF
+    type: String,
     required: true,
   },
   additionalRequirements: {
     type: String,
   },
   testReport: {
-    type: String, // URL to stored PDF
+    type: String,
   },
   invoice: {
-    type: String, // URL to stored PDF
+    type: String,
   },
   expectedDeliveryDate: {
     type: Date,
-    // Will be set when order is approved
   },
   createdAt: {
     type: Date,
@@ -100,7 +90,6 @@ OrderSchema.pre('save', async function(next) {
       const date = new Date();
       const year = date.getFullYear();
       
-      // Find the count of orders in the current year
       const count = await this.constructor.countDocuments({
         createdAt: {
           $gte: new Date(year, 0, 1),
@@ -108,7 +97,6 @@ OrderSchema.pre('save', async function(next) {
         }
       });
       
-      // Generate order number: ORD-YYYY-XX (XX is a running number)
       this.orderNumber = `ORD-${year}-${(count + 1).toString().padStart(2, '0')}`;
     }
     

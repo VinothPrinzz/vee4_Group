@@ -23,7 +23,7 @@ const whatsappTemplates = {
              `• Order ID: ${orderData.orderNumber}\n` +
              `• Product: ${orderData.productType}\n` +
              `• Material: ${orderData.metalType}\n` +
-             `• Dimensions: ${orderData.width}mm × ${orderData.height}mm × ${orderData.thickness}mm\n` +
+             `• Thickness: ${orderData.thickness}mm\n` +
              `• Quantity: ${orderData.quantity} units\n` +
              `• Color: ${orderData.color}\n\n` +
              `👤 *Customer Info:*\n` +

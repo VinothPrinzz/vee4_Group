@@ -631,10 +631,6 @@ startxref
                 <span className="info-value">{order.metalType}</span>
               </div>
               <div className="info-item">
-                <span className="info-label">Dimensions</span>
-                <span className="info-value">{order.width}mm × {order.height}mm × {order.thickness}mm</span>
-              </div>
-              <div className="info-item">
                 <span className="info-label">Color</span>
                 <span className="info-value">{order.color}</span>
               </div>

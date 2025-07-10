@@ -239,11 +239,6 @@ const OrderDetail = () => {
             </div>
             
             <div className="detail-group">
-              <p className="detail-label">Size</p>
-              <p className="detail-value">{order.width}mm x {order.height}mm</p>
-            </div>
-            
-            <div className="detail-group">
               <p className="detail-label">Thickness</p>
               <p className="detail-value">{order.thickness}mm</p>
             </div>

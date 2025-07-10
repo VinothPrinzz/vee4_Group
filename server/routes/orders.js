@@ -164,8 +164,6 @@ router.post('/', protect, upload.single('designFile'), async (req, res) => {
       productType,
       metalType,
       thickness,
-      width,
-      height,
       quantity,
       color,
       additionalRequirements,
@@ -176,8 +174,6 @@ router.post('/', protect, upload.single('designFile'), async (req, res) => {
       productType,
       metalType,
       thickness,
-      width,
-      height,
       quantity,
       color
     };
@@ -210,12 +206,9 @@ router.post('/', protect, upload.single('designFile'), async (req, res) => {
       productType,
       metalType,
       thickness: parseFloat(thickness),
-      width: parseFloat(width),
-      height: parseFloat(height),
       quantity: parseInt(quantity),
       color,
       additionalRequirements: additionalRequirements || '',
-      // Store serialized file info instead of a real path
       designFile: `memory-storage://${fileDetails.name}`,
     });
     
@@ -598,49 +591,54 @@ router.get('/:id/documents/:documentType', protect, async (req, res) => {
       });
     }
 
-    // Check if this is a virtual memory-storage file
+    // Handle S3 URLs
+    if (documentUrl.includes('amazonaws.com')) {
+      // For S3 URLs, generate a signed URL or redirect
+      const { S3Client, GetObjectCommand } = require('@aws-sdk/client-s3');
+      const { getSignedUrl } = require('@aws-sdk/s3-request-presigner');
+      
+      const s3Client = new S3Client({
+        region: process.env.AWS_REGION,
+        credentials: {
+          accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+          secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+        }
+      });
+      
+      // Extract key from S3 URL
+      const key = documentUrl.split('amazonaws.com/')[1];
+      
+      const command = new GetObjectCommand({
+        Bucket: process.env.AWS_S3_BUCKET_NAME,
+        Key: key,
+      });
+      
+      // Generate signed URL valid for 1 hour
+      const signedUrl = await getSignedUrl(s3Client, command, { expiresIn: 3600 });
+      
+      // Redirect to signed URL
+      return res.redirect(signedUrl);
+    }
+
+    // Handle memory-storage files (development)
     if (documentUrl.startsWith('memory-storage://')) {
-      // Generate dummy PDF content
+      // Generate dummy PDF content for development
       res.setHeader('Content-Type', 'application/pdf');
       res.setHeader('Content-Disposition', `attachment; filename=${documentType}-${order.orderNumber}.pdf`);
       
-      // Send a dummy PDF message
-      res.send(Buffer.from(`This is a placeholder for ${documentType}. In production, this would be stored in a proper storage service.`));
+      const dummyContent = `This is a placeholder for ${documentType} document. In production, this would be served from S3.`;
+      res.send(Buffer.from(dummyContent));
       return;
     }
     
-    // For local file system:
-    // Extract the file path from the URL
-    // URL format: http://host/uploads/userId/filename.pdf
-    const urlParts = documentUrl.split('/uploads/');
-    if (urlParts.length < 2) {
-      return res.status(404).json({
-        success: false,
-        message: 'Document path invalid',
-      });
-    }
+    // Handle other URLs (if any)
+    res.redirect(documentUrl);
     
-    const relativePath = urlParts[1]; // userId/filename.pdf
-    const filePath = path.join(__dirname, '../uploads', relativePath);
-    
-    // Check if file exists
-    if (!fs.existsSync(filePath)) {
-      return res.status(404).json({
-        success: false,
-        message: 'Document file not found',
-      });
-    }
-    
-    // Set the appropriate headers
-    res.setHeader('Content-Type', 'application/pdf');
-    res.setHeader('Content-Disposition', `attachment; filename=${documentType}-${order.orderNumber}.pdf`);
-    
-    // Send the file
-    fs.createReadStream(filePath).pipe(res);
   } catch (error) {
+    console.error('Document download error:', error);
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: 'Failed to download document',
     });
   }
 });

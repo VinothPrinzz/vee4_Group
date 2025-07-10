@@ -15,11 +15,9 @@ const NewOrderForm = () => {
   const [error, setError] = useState(null);
   
   const [formData, setFormData] = useState({
-    productType: 'sheet_metal', // Set actual default value, not empty
-    metalType: 'stainless_steel', // Set actual default value, not empty
-    thickness: '',
-    width: '',
-    height: '',
+    productType: 'sheet_metal',
+    metalType: 'stainless_steel',
+    thickness: '2.0', // Default thickness
     quantity: '',
     color: '',
     additionalRequirements: '',
@@ -27,17 +25,26 @@ const NewOrderForm = () => {
   });
   
   const productTypes = [
-    // Remove the empty placeholder option since we have a default
     { value: 'sheet_metal', label: 'Sheet Metal' },
     { value: 'fabrication', label: 'Metal Fabrication' },
     { value: 'panel', label: 'Electric Panel' }
   ];
   
+  // UPDATED: Remove aluminum, add MS CRC
   const metalTypes = [
-    // Remove the empty placeholder option since we have a default
     { value: 'stainless_steel', label: 'Stainless Steel' },
     { value: 'mild_steel', label: 'Mild Steel' },
-    { value: 'aluminum', label: 'Aluminum' }
+    { value: 'ms_crc', label: 'MS CRC' }
+  ];
+  
+  // NEW: Thickness dropdown options
+  const thicknessOptions = [
+    { value: '1.2', label: '1.2 mm' },
+    { value: '1.5', label: '1.5 mm' },
+    { value: '1.6', label: '1.6 mm' },
+    { value: '1.8', label: '1.8 mm' },
+    { value: '2.0', label: '2.0 mm' },
+    { value: '3.0', label: '3.0 mm' }
   ];
   
   const handleChange = (e) => {
@@ -128,52 +135,24 @@ const NewOrderForm = () => {
             id="thickness"
             name="thickness"
             label="Thickness (mm)"
-            type="number"
-            placeholder="e.g. 2.5"
+            type="select"
             value={formData.thickness}
             onChange={handleChange}
+            options={thicknessOptions}
             required
-            min="0.1"
-            step="0.1"
           />
           
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem' }}>
-            <FormField
-              id="width"
-              name="width"
-              label="Width (mm)"
-              type="number"
-              placeholder="Width"
-              value={formData.width}
-              onChange={handleChange}
-              required
-              min="1"
-            />
-            
-            <FormField
-              id="height"
-              name="height"
-              label="Height (mm)"
-              type="number"
-              placeholder="Height"
-              value={formData.height}
-              onChange={handleChange}
-              required
-              min="1"
-            />
-            
-            <FormField
-              id="quantity"
-              name="quantity"
-              label="Quantity"
-              type="number"
-              placeholder="Enter quantity"
-              value={formData.quantity}
-              onChange={handleChange}
-              required
-              min="1"
-            />
-          </div>
+          <FormField
+            id="quantity"
+            name="quantity"
+            label="Quantity"
+            type="number"
+            placeholder="Enter quantity"
+            value={formData.quantity}
+            onChange={handleChange}
+            required
+            min="1"
+          />
           
           <FormField
             id="color"

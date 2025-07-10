@@ -38,10 +38,6 @@ const emailTemplates = {
               <td style="padding: 12px; font-weight: bold;">Metal Type</td>
               <td style="padding: 12px;">${orderData.metalType}</td>
             </tr>
-            <tr>
-              <td style="padding: 12px; font-weight: bold;">Dimensions</td>
-              <td style="padding: 12px;">${orderData.width}mm × ${orderData.height}mm × ${orderData.thickness}mm</td>
-            </tr>
             <tr style="background: #e2e8f0;">
               <td style="padding: 12px; font-weight: bold;">Quantity</td>
               <td style="padding: 12px;">${orderData.quantity} units</td>
@@ -254,7 +250,7 @@ const emailTemplates = {
             <p style="margin: 5px 0;"><strong>Product:</strong> ${orderData.productType}</p>
             <p style="margin: 5px 0;"><strong>Material:</strong> ${orderData.metalType}</p>
             <p style="margin: 5px 0;"><strong>Quantity:</strong> ${orderData.quantity} units</p>
-            <p style="margin: 5px 0;"><strong>Dimensions:</strong> ${orderData.width}mm × ${orderData.height}mm × ${orderData.thickness}mm</p>
+            <p style="margin: 5px 0;"><strong>Dimensions:</strong> ${orderData.thickness}mm</p>
           </div>
           
           <div style="background: #e0f2fe; border-left: 4px solid #0ea5e9; padding: 15px; margin: 20px 0;">
